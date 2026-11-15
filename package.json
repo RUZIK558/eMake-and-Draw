@@ -1,0 +1,90 @@
+{
+  "name": "emake-draw",
+  "productName": "eMakeDraw",
+  "version": "1.1.0",
+  "description": "Локальный редактор дизайна, сайтов и плагинов",
+  "main": "main.js",
+  "author": "delay",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux",
+    "dist:all": "electron-builder -wl"
+  },
+  "devDependencies": {
+    "electron": "^31.3.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "ru.emake.draw",
+    "productName": "eMakeDraw",
+    "executableName": "emakedraw",
+    "files": [
+      "main.js",
+      "preload.js",
+      "eMake-and-Draw.html",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "eMakeDraw"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "rpm",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Graphics",
+      "maintainer": "delay <delay@local>",
+      "synopsis": "Локальный редактор дизайна, сайтов и плагинов",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "rpm": {
+      "packageCategory": "graphics",
+      "compression": "xz"
+    },
+    "deb": {
+      "packageCategory": "graphics",
+      "priority": "optional"
+    }
+  }
+}
