@@ -1,0 +1,52 @@
+name: Build macOS DMG
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dmg:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build universal app
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npx electron-builder --mac dir --universal --publish never
+
+      - name: Ad-hoc sign the app
+        run: |
+          APP_PATH="dist/mac-universal/eMakeDraw.app"
+          test -d "$APP_PATH"
+          echo "APP_PATH=$APP_PATH" >> "$GITHUB_ENV"
+          codesign --force --deep --sign - "$APP_PATH"
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+
+      - name: Create DMG
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          mkdir -p dist/dmg
+          cp -R "$APP_PATH" dist/dmg/
+          ln -s /Applications dist/dmg/Applications
+          hdiutil create -volname "eMakeDraw $VERSION" -srcfolder dist/dmg -ov -format UDZO "dist/eMakeDraw-${VERSION}-universal.dmg"
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: dist/*.dmg
+          if-no-files-found: error
